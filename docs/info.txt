@@ -1,0 +1,73 @@
+my-fastify-app/
+├── src/
+│   ├── controllers/          # Lógica de controladores
+│   │   ├── auth.controller.js
+│   │   ├── users.controller.js
+│   │   └── products.controller.js
+│   ├── routes/              # Definición de rutas
+│   │   ├── auth.routes.js
+│   │   ├── users.routes.js
+│   │   ├── products.routes.js
+│   │   └── index.js
+│   ├── models/              # Modelos de datos
+│   │   ├── User.js
+│   │   ├── Product.js
+│   │   └── index.js
+│   ├── schemas/             # Esquemas de validación
+│   │   ├── auth.schema.js
+│   │   ├── user.schema.js
+│   │   └── product.schema.js
+│   ├── services/            # Lógica de negocio
+│   │   ├── auth.service.js
+│   │   ├── user.service.js
+│   │   └── product.service.js
+│   ├── plugins/             # Plugins personalizados
+│   │   ├── database.js
+│   │   ├── cors.js
+│   │   ├── auth0.js
+│   │   └── swagger.js
+│   ├── middleware/          # Middlewares personalizados
+│   │   ├── auth.middleware.js
+│   │   └── error.middleware.js
+│   ├── utils/               # Utilidades
+│   │   ├── logger.js
+│   │   ├── constants.js
+│   │   └── helpers.js
+│   ├── config/              # Configuración
+│   │   ├── database.js
+│   │   ├── environment.js
+│   │   └── server.js
+│   └── app.js               # Configuración principal de Fastify
+├── database/                # Base de datos y migraciones
+│   ├── database.sqlite      # Archivo SQLite (no commitear)
+│   ├── migrations/          # Migraciones SQL
+│   │   ├── 001_create_users_table.js
+│   │   ├── 002_create_products_table.js
+│   │   └── 003_add_indexes.js
+│   └── seeds/               # Datos iniciales
+│       ├── 001_initial_users.js
+│       └── 002_sample_products.js
+├── tests/                   # Tests
+│   ├── unit/
+│   │   ├── controllers/
+│   │   ├── models/
+│   │   └── services/
+│   ├── integration/
+│   │   ├── auth.test.js
+│   │   ├── users.test.js
+│   │   └── products.test.js
+│   └── fixtures/
+│       ├── users.json
+│       └── products.json
+├── docs/                    # Documentación
+│   ├── API.md
+│   ├── SETUP.md
+│   └── DEPLOYMENT.md
+├── .env                     # Variables de entorno (no commitear)
+├── .env.example             # Ejemplo de variables de entorno
+├── .gitignore               # Git ignore
+├── knexfile.js              # Configuración de Knex
+├── package.json             # Dependencias y scripts
+├── package-lock.json        # Lock de dependencias
+├── README.md                # Documentación principal
+└── server.js                # Punto de entrada
