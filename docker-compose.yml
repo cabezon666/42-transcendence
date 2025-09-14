@@ -1,0 +1,277 @@
+services:
+  ip-detector:
+    image: alpine:latest
+    container_name: ft_transcendence_ip_detector
+    volumes:
+      - ./nginx/conf.d:/nginx-conf
+    command: |
+      sh -c '
+        apk add --no-cache curl
+        echo "Detecting public IP..."
+        PUBLIC_IP=$$(curl -s ifconfig.io)
+        echo "Public IP: $$PUBLIC_IP"
+        
+        if [ "$$PUBLIC_IP" = "188.245.229.241" ]; then
+          echo "Server IP detected! Enabling trans.smasse.xyz configuration..."
+          if [ -f /nginx-conf/trans.smasse.xyz.conf.disabled ]; then
+            mv /nginx-conf/trans.smasse.xyz.conf.disabled /nginx-conf/trans.smasse.xyz.conf
+          fi
+          echo "SERVER_MODE=true" > /nginx-conf/.server-mode
+        else
+          echo "Local/different IP detected. Using localhost-only configuration..."
+          if [ -f /nginx-conf/trans.smasse.xyz.conf ]; then
+            mv /nginx-conf/trans.smasse.xyz.conf /nginx-conf/trans.smasse.xyz.conf.disabled
+          fi
+          echo "SERVER_MODE=false" > /nginx-conf/.server-mode
+        fi
+        echo "IP detection complete."
+      '
+
+  # SSL certificate generator (init container)
+  ssl-generator:
+    image: alpine:latest
+    container_name: ft_transcendence_ssl_generator
+    volumes:
+      - ./nginx/ssl:/ssl
+    depends_on:
+      ip-detector:
+        condition: service_completed_successfully
+    command: |
+      sh -c '
+        apk add --no-cache openssl
+        if [ ! -f /ssl/localhost.crt ]; then
+          echo "Generating self-signed SSL certificates for localhost..."
+          openssl genrsa -out /ssl/localhost.key 2048
+          openssl req -new -key /ssl/localhost.key -out /ssl/localhost.csr -subj "/C=US/ST=State/L=City/O=ft_transcendence/OU=Dev/CN=localhost"
+          openssl x509 -req -days 365 -in /ssl/localhost.csr -signkey /ssl/localhost.key -out /ssl/localhost.crt
+          chmod 600 /ssl/localhost.key
+          chmod 644 /ssl/localhost.crt
+          rm /ssl/localhost.csr
+          echo "SSL certificates generated successfully!"
+        else
+          echo "SSL certificates already exist, skipping generation."
+        fi
+      '
+
+  # pong-game:
+  #   build:
+  #     context: ./node
+  #     dockerfile: Dockerfile
+  #   container_name: ft_transcendence
+  #   environment:
+  #     - NODE_ENV=production
+  #     - PORT=3000
+  #     - HOST=0.0.0.0
+  #   volumes:
+  #     - ./node:/app
+  #     - /app/node_modules
+  #   restart: unless-stopped
+  #   networks:
+  #     - transcendence-network
+
+  auth_server:
+    build:
+      context: ./auth_server
+      dockerfile: Dockerfile
+    container_name: ft_transcendence_auth_server
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-me-in-production}
+      - SQLITE_API_TOKEN=${SQLITE_API_TOKEN:-secure-random-token-change-me}
+      - SQLITE_API_URL=http://sqlite:7000
+      - FRONTEND_URL=https://localhost:8443
+      - BACKEND_URL=http://auth_server:3000
+      - AUTH_SERVER_URL=http://auth_server:3000
+      - OAUTH_CALLBACK_URL=https://localhost:8443
+      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+    volumes:
+      - ./auth_server:/app
+      - /app/node_modules
+    depends_on:
+      - sqlite
+    restart: unless-stopped
+    networks:
+      - transcendence-network
+    # No ports exposed externally - only accessible via nginx proxy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  main_backend:
+    build:
+      context: ./main/backend
+      dockerfile: Dockerfile
+    container_name: ft_transcendence_main_backend
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - HOST=0.0.0.0
+      - AUTH_SERVER_URL=http://auth_server:3000
+      - SOCKET_IO_URL=http://socket_io:3001
+    volumes:
+      - ./main/backend:/app
+      - /app/node_modules
+    depends_on:
+      auth_server:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - transcendence-network
+    # No ports exposed externally - only accessible via nginx proxy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  main_frontend:
+    build:
+      context: ./main/frontend
+      dockerfile: Dockerfile
+    container_name: ft_transcendence_main_frontend
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - HOST=0.0.0.0
+    volumes:
+      - ./main/frontend:/app
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - transcendence-network
+    # No ports exposed externally - only accessible via nginx proxy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  sqlite:
+    build:
+      context: ./SQLite
+      dockerfile: Dockerfile
+    container_name: ft_transcendence_sqlite
+    environment:
+      - API_TOKEN=${SQLITE_API_TOKEN:-secure-random-token-change-me}
+      - DB_PATH=/data/app.db
+      - PORT=7000
+      - HOST=0.0.0.0
+    volumes:
+      - ./SQLite/data:/data
+    restart: unless-stopped
+    networks:
+      - transcendence-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:7000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  socket_io:
+    build:
+      context: ./socket_io
+      dockerfile: Dockerfile
+    container_name: ft_transcendence_socket_io
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - HOST=0.0.0.0
+      - AUTH_SERVER_URL=http://auth_server:3000
+      - SQLITE_API_URL=http://sqlite:7000
+      - SQLITE_API_TOKEN=${SQLITE_API_TOKEN:-secure-random-token-change-me}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-me-in-production}
+    volumes:
+      - ./socket_io:/app
+      - /app/node_modules
+    depends_on:
+      auth_server:
+        condition: service_healthy
+      sqlite:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - transcendence-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3001/esque-je-suis-tjr-trans"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  nginx:
+    image: nginx:alpine
+    container_name: ft_transcendence_nginx
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/html:/usr/share/nginx/html:ro
+      - certbot_certs:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot:ro
+    depends_on:
+      ip-detector:
+        condition: service_completed_successfully
+      ssl-generator:
+        condition: service_completed_successfully
+      auth_server:
+        condition: service_healthy
+      main_backend:
+        condition: service_healthy
+      main_frontend:
+        condition: service_healthy
+      socket_io:
+        condition: service_healthy
+      # pong-game:
+      #   condition: service_started
+    restart: unless-stopped
+    networks:
+      - transcendence-network
+
+  certbot:
+    image: certbot/certbot
+    container_name: ft_transcendence_certbot
+    volumes:
+      - certbot_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    restart: unless-stopped
+
+  # Let's Encrypt setup service (run manually)
+  letsencrypt-setup:
+    image: certbot/certbot
+    container_name: ft_transcendence_letsencrypt_setup
+    volumes:
+      - certbot_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    profiles:
+      - setup
+    command: >
+      certonly
+      --webroot
+      --webroot-path=/var/www/certbot
+      --email ${LETSENCRYPT_EMAIL:-admin@example.com}
+      --agree-tos
+      --no-eff-email
+      -d trans.smasse.xyz
+
+volumes:
+  certbot_certs:
+  certbot_www:
+
+networks:
+  transcendence-network:
+    driver: bridge

@@ -1,0 +1,24 @@
+{
+  "name": "ft-transcendence-pong",
+  "version": "1.0.0",
+  "description": "Babylon.js Pong game with Fastify backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "dev:full": "concurrently \"npm run dev\" \"npm run build-css\"",
+    "build-css": "tailwindcss -i ./src/input.css -o /tmp/css/output.css --watch",
+    "build-css-prod": "tailwindcss -i ./src/input.css -o /tmp/css/output.css --minify"
+  },
+  "keywords": ["fastify", "babylonjs", "pong", "game"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@fastify/static": "^7.0.4",
+    "fastify": "^4.28.1"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "tailwindcss": "^3.4.10"
+  }
+}

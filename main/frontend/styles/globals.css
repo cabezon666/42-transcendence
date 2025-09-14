@@ -1,0 +1,542 @@
+@import "tailwindcss";
+
+/* Base Styles */
+* {
+  border-color: hsl(var(--border));
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "rlig" 1, "calt" 1;
+  /* Prevent zoom on double tap in iOS Safari */
+  touch-action: manipulation;
+}
+
+/* CSS Variables for dark theme only */
+:root {
+  /* Border radius */
+  --radius: 0.5rem;
+
+  /* Brand colors */
+  --brand-50: 248 250 252;
+  --brand-100: 241 245 249;
+  --brand-200: 226 232 240;
+  --brand-300: 203 213 225;
+  --brand-400: 148 163 184;
+  --brand-500: 100 116 139;
+  --brand-600: 71 85 105;
+  --brand-700: 51 65 85;
+  --brand-800: 30 41 59;
+  --brand-900: 15 23 42;
+  --brand-950: 2 6 23;
+
+  /* Dark theme colors as default */
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --primary: 223, 84%, 15%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 217.2 91.2% 59.8%;
+
+  /* Status colors */
+  --success: 142.1 76.2% 36.3%;
+  --success-foreground: 355.7 100% 97.3%;
+  --warning: 32.6 94.6% 43.7%;
+  --warning-foreground: 355.7 100% 97.3%;
+  --error: 0 84.2% 60.2%;
+  --error-foreground: 355.7 100% 97.3%;
+  --info: 221.2 83.2% 53.3%;
+  --info-foreground: 210 40% 98%;
+
+  --cool: 223, 84%, 15%;
+  --cool-foreground: 210 40% 98%;
+}
+
+/* Component Classes */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  /* Ensure minimum touch target size for mobile accessibility */
+  min-height: 44px;
+  min-width: 44px;
+  /* Prevent text selection on buttons */
+  user-select: none;
+  -webkit-user-select: none;
+  /* Better touch feedback */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.btn-sm {
+  height: 2.25rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.btn-md {
+  height: 2.5rem;
+  padding: 0.5rem 1rem;
+}
+
+.btn-lg {
+  height: 2.75rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.btn-primary {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.btn-primary:hover {
+  background-color: hsl(var(--primary) / 0.9);
+}
+
+.btn-secondary {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+}
+
+.btn-secondary:hover {
+  background-color: hsl(var(--secondary) / 0.8);
+}
+
+.btn-accent {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+.btn-accent:hover {
+  background-color: hsl(var(--accent) / 0.8);
+}
+
+.btn-success {
+  background-color: hsl(var(--success));
+  color: hsl(var(--success-foreground));
+}
+
+.btn-success:hover {
+  background-color: hsl(var(--success) / 0.9);
+}
+
+.btn-warning {
+  background-color: hsl(var(--warning));
+  color: hsl(var(--warning-foreground));
+}
+
+.btn-warning:hover {
+  background-color: hsl(var(--warning) / 0.9);
+}
+
+.btn-error {
+  background-color: hsl(var(--error));
+  color: hsl(var(--error-foreground));
+}
+
+.btn-error:hover {
+  background-color: hsl(var(--error) / 0.9);
+}
+
+.btn-outline {
+  border: 1px solid hsl(var(--input));
+  background-color: hsl(var(--background));
+}
+
+.btn-outline:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+.btn-ghost:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+/* Card Components */
+.card {
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  /* Better mobile touch experience */
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 1rem;
+}
+
+/* Responsive padding for mobile */
+@media (min-width: 640px) {
+  .card-header {
+    padding: 1.5rem;
+  }
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+/* Responsive font size */
+@media (min-width: 640px) {
+  .card-title {
+    font-size: 1.5rem;
+  }
+}
+
+.card-description {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.4;
+}
+
+/* Responsive font size */
+@media (min-width: 640px) {
+  .card-description {
+    font-size: 0.875rem;
+  }
+}
+
+.card-content {
+  padding: 1rem;
+  padding-top: 0;
+}
+
+/* Responsive padding for mobile */
+@media (min-width: 640px) {
+  .card-content {
+    padding: 1.5rem;
+    padding-top: 0;
+  }
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  padding-top: 0;
+}
+
+/* Responsive padding for mobile */
+@media (min-width: 640px) {
+  .card-footer {
+    padding: 1.5rem;
+    padding-top: 0;
+  }
+}
+
+/* Input Components */
+.input {
+  display: flex;
+  height: 2.5rem;
+  width: 100%;
+  border-radius: 0.375rem;
+  border: 1px solid hsl(var(--input));
+  background-color: hsl(var(--background));
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+  /* Better mobile accessibility */
+  min-height: 44px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Prevent zoom on iOS when font-size is less than 16px */
+@media screen and (max-width: 768px) {
+  .input {
+    font-size: 16px;
+  }
+}
+
+.input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+.input:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Label Component */
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.label:has(~ input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Alert Components */
+.alert {
+  position: relative;
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid;
+  padding: 1rem;
+}
+
+.alert-success {
+  border-color: hsl(var(--success) / 0.5);
+  color: hsl(var(--success-foreground));
+  background-color: hsl(var(--success) / 0.1);
+}
+
+.alert-warning {
+  border-color: hsl(var(--warning) / 0.5);
+  color: hsl(var(--warning-foreground));
+  background-color: hsl(var(--warning) / 0.1);
+}
+
+.alert-error {
+  border-color: hsl(var(--error) / 0.5);
+  color: hsl(var(--error-foreground));
+  background-color: hsl(var(--error) / 0.1);
+}
+
+.alert-info {
+  border-color: hsl(var(--info) / 0.5);
+  color: hsl(var(--info-foreground));
+  background-color: hsl(var(--info) / 0.1);
+}
+
+/* Custom Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slideInFromLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideInFromRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideInFromTop {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slideInFromBottom {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+@keyframes pulseGentle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes bounceGentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Focus styles */
+.focus-ring:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground));
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--foreground));
+}
+
+/* Selection styles */
+::selection {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+/* Print styles */
+@media print {
+  * {
+    color: black !important;
+    background: white !important;
+  }
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+  /* Improve touch targets */
+  button, 
+  input, 
+  select, 
+  textarea, 
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better text readability on mobile */
+  body {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  
+  /* Prevent horizontal scroll on small screens */
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Improve form layout on mobile */
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  /* Better spacing for mobile cards */
+  .card {
+    margin-bottom: 1rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btn {
+    border: 2px solid currentColor;
+  }
+  
+  .card {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---- CoolButton styles that need selectors/pseudo-elements/keyframes ---- */
+@layer components {
+  @property --rotation {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+  }
+
+  @keyframes cool-rotate {
+    to { --rotation: 360deg; }
+  }
+
+  .cool-button {
+    position: relative;
+    border: none;
+  }
+
+  .cool-button::before {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    background: conic-gradient(from var(--rotation), purple, blue, green, yellow, orange, red, purple);
+    filter: blur(20px);
+    border-radius: 0.375rem; /* matches rounded-md */
+    z-index: -2;
+    animation: cool-rotate 5s linear infinite;
+    transition: filter 0.1s ease-in-out, background 0.35s;
+  }
+
+  .cool-button:active::before {
+    filter: blur(10px);
+  }
+
+  .cool-button:active .cap {
+    transform: scale(0.93);
+  }
+
+  /* Variant hooks using CSS variables from your theme tokens */
+  .cool-button[data-variant="cool"]      { --cool-btn-bg: hsl(var(--cool));      --cool-btn-fg: hsl(var(--cool-foreground)); }
+  .cool-button[data-variant="primary"]   { --cool-btn-bg: hsl(var(--primary));   --cool-btn-fg: hsl(var(--primary-foreground)); }
+  .cool-button[data-variant="secondary"] { --cool-btn-bg: hsl(var(--secondary)); --cool-btn-fg: hsl(var(--secondary-foreground)); }
+  .cool-button[data-variant="accent"]    { --cool-btn-bg: hsl(var(--accent));    --cool-btn-fg: hsl(var(--accent-foreground)); }
+  .cool-button[data-variant="success"]   { --cool-btn-bg: hsl(var(--success));   --cool-btn-fg: hsl(var(--success-foreground)); }
+  .cool-button[data-variant="warning"]   { --cool-btn-bg: hsl(var(--warning));   --cool-btn-fg: hsl(var(--warning-foreground)); }
+  .cool-button[data-variant="error"]     { --cool-btn-bg: hsl(var(--error));     --cool-btn-fg: hsl(var(--error-foreground)); }
+  .cool-button[data-variant="outline"]   { --cool-btn-bg: hsl(var(--background)); --cool-btn-fg: hsl(var(--foreground)); box-shadow: inset 0 0 0 1px hsl(var(--input)), 0 6px 10px -2px rgb(0 0 0 / 0.35); }
+  .cool-button[data-variant="ghost"]     { --cool-btn-bg: linear-gradient(145deg,rgba(255 255 255 / 0.05),rgba(255 255 255 / 0.02)); --cool-btn-fg: hsl(var(--foreground)); }
+  .cool-button[data-variant="ghost"] .cap { backdrop-filter: blur(6px); }
+}
